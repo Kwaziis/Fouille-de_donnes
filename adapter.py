@@ -42,8 +42,8 @@ for action in actions:
 '''
 
 # Etape 2: sauvegarder les actions dans un fichier json
-with open('actions.json', 'w') as f:
+with open('actions.json', 'w', encoding='utf-8') as f:
     for action in actions:
         action.date = str(action.date)
         action.heure = str(action.heure)
-    json.dump(actions, f, default=lambda o: o.__dict__, indent=4)
+    json.dump(actions, f, default=lambda o: o.__dict__, indent=4, ensure_ascii=False)
