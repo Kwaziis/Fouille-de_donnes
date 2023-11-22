@@ -12,7 +12,7 @@ cursor = conn.cursor()
 
 
 
-cursor.execute("SELECT Utilisateur, Date, Heure, Titre, Attribut FROM transition")
+cursor.execute("SELECT Utilisateur, Date, Heure, Titre, Attribut FROM transition WHERE Date <= '2009-05-10'")#WHERE Date <= '2009-05-10' filtrer date de fin du  forum
 
 # Récupération des données et création d'instances de la classe Action
 actions = []
