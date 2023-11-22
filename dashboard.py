@@ -1,5 +1,5 @@
 import dash
-from dash import html, dcc
+from dash import html, dcc, dash_table
 from dash.dependencies import Input, Output
 import plotly.graph_objs as go
 import numpy as np
@@ -12,7 +12,13 @@ forum_data = engine.dataProcessing("actions.json")
 app = dash.Dash(__name__)
 
 app.layout = html.Div([
-    html.Table(id='top_index_table'),
+    dash_table.DataTable(
+    id='top_index_table',
+    columns=[{"name": i, "id": i} for i in ['Forum', 'Top Active', 'Top Discussion', 'Top Popular']],
+    data=[],
+    row_selectable='single',
+    selected_rows=[],
+    ),
     dcc.Slider(
         id='week-slider',
         min=0,
@@ -74,7 +80,7 @@ def update_output(value):
     return figure
 
 @app.callback(
-    Output('top_index_table', 'children'),
+    Output('top_index_table', 'data'),
     [Input('week-slider', 'value')]
 )
 def update_tables(week):
@@ -82,21 +88,25 @@ def update_tables(week):
     top_discussion_forums = engine.top_5_discussion_forums(forum_data, week)
     top_popular_forums = engine.top_5_popular_forums(forum_data, week)
 
-    table = html.Table([
-        html.Thead(
-            html.Tr([html.Th('Forum'), html.Th('Top Active'), html.Th('Top Discussion'), html.Th('Top Popular')])
-        ),
-        html.Tbody([
-            html.Tr([
-                html.Td(i+1),
-                html.Td(top_active_forums[i] if i < len(top_active_forums) else ''),
-                html.Td(top_discussion_forums[i] if i < len(top_discussion_forums) else ''),
-                html.Td(top_popular_forums[i] if i < len(top_popular_forums) else '')
-            ]) for i in range(max(len(top_active_forums), len(top_discussion_forums), len(top_popular_forums)))
-        ])
-    ])
+    data = [{
+        'Forum': i+1,
+        'Top Active': top_active_forums[i] if i < len(top_active_forums) else '',
+        'Top Discussion': top_discussion_forums[i] if i < len(top_discussion_forums) else '',
+        'Top Popular': top_popular_forums[i] if i < len(top_popular_forums) else ''
+    } for i in range(max(len(top_active_forums), len(top_discussion_forums), len(top_popular_forums)))]
 
-    return table
+    return data
+
+# Add a new callback to update the dropdown value when a row is selected
+@app.callback(
+    Output('forum-selector', 'value'),
+    [Input('top_index_table', 'active_cell'),
+     Input('top_index_table', 'data')]
+)
+def update_dropdown(active_cell, data):
+    if active_cell and active_cell['column_id'] != 'Forum':
+        return data[active_cell['row']][active_cell['column_id']]
+    return dash.no_update
     
 
 if __name__ == '__main__':
