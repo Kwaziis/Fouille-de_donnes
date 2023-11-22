@@ -127,13 +127,34 @@ def dataProcessing(filename):
         forum_populaire_indice(week_forum)
 
         #on ajoute les données dans le data
+        applied_forums = []
         for weeklyForum in week_forum:
             data[weeklyForum.forumId].append(weeklyForum)
+            applied_forums.append(weeklyForum.forumId)
         for key in data.keys():
-            if key not in week_forum:
+            if key not in applied_forums:
                 data[key].append(ForumDetail(key))
     return data
 
+def extract_actif_indice(data,forumID):
+    return [forum.ActiveIndice for forum in data[forumID]]
+def extract_discute_indice(data,forumID):
+    return [forum.citationIndice for forum in data[forumID]]
+def extract_populaire_indice(data,forumID):
+    return [forum.populariteIndice for forum in data[forumID]]
+
+def top_5_active_forums(data, i):
+    sorted_forums = sorted(data.items(), key=lambda item: item[1][i].ActiveIndice, reverse=True)
+    return [forum[0] for forum in sorted_forums[:5]]
+
+def top_5_discussion_forums(data, i):
+    sorted_forums = sorted(data.items(), key=lambda item: item[1][i].citationIndice, reverse=True)
+    return [forum[0] for forum in sorted_forums[:5]]
+
+def top_5_popular_forums(data, i):
+    sorted_forums = sorted(data.items(), key=lambda item: item[1][i].populariteIndice, reverse=True)
+    return [forum[0] for forum in sorted_forums[:5]]
+
 if(__name__ == "__main__"):
     data = dataProcessing("actions.json")
-    print(data)
+    print(top_5_active_forums(data, 1))
