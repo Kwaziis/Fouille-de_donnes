@@ -104,8 +104,36 @@ def forum_populaire_indice(forums):
         popularite_indice = forum.userNumber()[1]/total
         forum.setPopulariteIndice(round(popularite_indice,2))
 
-if(__name__ == "__main__"):
-    actions = load_actions("actions.json")
+def dataProcessing(filename):
+    actions = load_actions(filename)
     forums = get_forum_details(actions,InterestingActions)
+    #on cree un aray pour chaque forum avec le complet d'abord puis le détail pour chaque semaine
+    data = {}
+    for forum in forums:
+        data[forum.forumId] = []
+        data[forum.forumId].append(forum)
+    #on process les indicateurs sur le overall
+    forum_actif_indice(forums)
+    forum_discute_indice(forums)
     forum_populaire_indice(forums)
-    print(forums)
+
+    #maintenant on s'ocupe du détail par semaine
+    week_actions = split_action_list_by_week(actions)
+    for week_action in week_actions:
+        week_forum = get_forum_details(week_action,InterestingActions)
+        #on process les indicateurs sur le weekly
+        forum_actif_indice(week_forum)
+        forum_discute_indice(week_forum)
+        forum_populaire_indice(week_forum)
+
+        #on ajoute les données dans le data
+        for weeklyForum in week_forum:
+            data[weeklyForum.forumId].append(weeklyForum)
+        for key in data.keys():
+            if key not in week_forum:
+                data[key].append(ForumDetail(key))
+    return data
+
+if(__name__ == "__main__"):
+    data = dataProcessing("actions.json")
+    print(data)
