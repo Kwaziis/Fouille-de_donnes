@@ -49,7 +49,7 @@ def update_output(value):
     if(np.max(dicute_indice) != 0):
         dicute_indice /= np.max(dicute_indice)
 
-    x_axis = list(range(len(popularite_indice)))[1:]
+    x_axis = list(range(len(popularite_indice)+1))[1:]
 
     figure = {
     'data': [
